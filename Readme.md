@@ -7,6 +7,7 @@ GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/ByronMattingly2015/FARS?branch=master&svg=true)](https://ci.appveyor.com/project/ByronMattingly2015/FARS)
 
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/yronMattingly2015/FARS?svg=true)]((https://ci.appveyor.com/api/projects/status/github/ByronMattingly2015/)
 
 ## Create an Example Package in R 
 
