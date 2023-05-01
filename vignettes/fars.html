@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Byron Mattingly" />
+
+<meta name="date" content="2023-05-01" />
+
+<title>Fatality Analysis Reporting System (FARS)</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Fatality Analysis Reporting System
+(FARS)</h1>
+<h4 class="author">Byron Mattingly</h4>
+<h4 class="date">2023-05-01</h4>
+
+
+
+<div id="vignette-info" class="section level2">
+<h2>Vignette Info</h2>
+<p>The fars package reads and plots Fatality Analysis Reporting System
+(FARS) data from the <a href="https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars">National
+Highway Traffic Safety Administration</a>.</p>
+<p>According to <a href="https://en.wikipedia.org/wiki/Fatality_Analysis_Reporting_System">Wikipedia</a>,
+“Fatality Analysis Reporting System <a href="https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars">FARS</a>
+was created in the United States by the National Highway Traffic Safety
+Administration (NHTSA) to provide an overall measure of highway safety,
+to help suggest solutions, and to help provide an objective basis to
+evaluate the effectiveness of motor vehicle safety standards and highway
+safety programs.</p>
+</div>
+<div id="load-packages" class="section level2">
+<h2>Load Packages</h2>
+</div>
+<div id="dependencies" class="section level2">
+<h2>Dependencies</h2>
+<p>You need to load the following packages before starting:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Attaching package: &#39;dplyr&#39;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The following objects are masked from &#39;package:stats&#39;:</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     filter, lag</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The following objects are masked from &#39;package:base&#39;:</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(maps)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span></code></pre></div>
+</div>
+<div id="package-description" class="section level2">
+<h2>Package Description</h2>
+<p>This is the final Peer-graded Assignment from Coursera’s Building an
+R Package.</p>
+<p>The <code>FARS</code> package contains functions provided for the
+students. These functions were written to analyze data from the <a href="https://www.nhtsa.gov">US National Highway Traffic Safety
+Administration’s Fatality Analysis Reporting System</a> (FARS). FARS is
+a nationwide census providing the American public yearly data regarding
+fatal injuries suffered in motor vehicle traffic crashes.</p>
+</div>
+<div id="included-data" class="section level2">
+<h2>Included data</h2>
+<p>Data files included within the package are:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">list.files</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="at">package =</span> <span class="st">&quot;fars&quot;</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;accident_2013.csv.bz2&quot; &quot;accident_2014.csv.bz2&quot; &quot;accident_2015.csv.bz2&quot;</span></span></code></pre></div>
+</div>
+<div id="package-functions" class="section level2">
+<h2>Package Functions</h2>
+<div id="function-make_filename" class="section level3">
+<h3>Function <code>make_filename</code></h3>
+<p>This function returns file name and path to the data files:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>yr <span class="ot">&lt;-</span> <span class="dv">2015</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make_filename</span>(yr)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;C:/Users/byron/OneDrive/Documents/R/win-library/4.1/fars/extdata/accident_2015.csv.bz2&quot;</span></span></code></pre></div>
+</div>
+<div id="function-fars_read_years" class="section level3">
+<h3>Function <code>fars_read_years</code></h3>
+<p>Ancillary function used by <code>fars_summarize_years</code></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fars_read_years</span>(<span class="dv">2013</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: `tbl_df()` was deprecated in dplyr 1.0.0.</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; i Please use `tibble::as_tibble()` instead.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; i The deprecated feature was likely used in the fars package.</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Please report the issue to the authors.</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; This warning is displayed once every 8 hours.</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; generated.</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 30,202 x 2</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    MONTH  year</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1     1  2013</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2     1  2013</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3     1  2013</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4     1  2013</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5     1  2013</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  6     1  2013</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  7     1  2013</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  8     1  2013</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  9     1  2013</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10     1  2013</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # ... with 30,192 more rows</span></span></code></pre></div>
+</div>
+<div id="function-fars_summarize_years" class="section level3">
+<h3>Function <code>fars_summarize_years</code></h3>
+<p>This function summarizes yearly accidents data, by month.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">fars_summarize_years</span>(<span class="dv">2015</span>))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fars_summarize_years</span>(<span class="fu">c</span>(<span class="dv">2015</span>, <span class="dv">2014</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 12 x 3</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    MONTH `2014` `2015`</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    &lt;dbl&gt;  &lt;int&gt;  &lt;int&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1     1   2168   2368</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2     2   1893   1968</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3     3   2245   2385</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4     4   2308   2430</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5     5   2596   2847</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  6     6   2583   2765</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  7     7   2696   2998</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  8     8   2800   3016</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  9     9   2618   2865</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10    10   2831   3019</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11    11   2714   2724</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 12    12   2604   2781</span></span></code></pre></div>
+</div>
+</div>
+<div id="section" class="section level1">
+<h1></h1>
+<p>plot(fars_summarize_years(2015))</p>
+<div id="function-fars_map_state" class="section level3">
+<h3>Function <code>fars_map_state</code></h3>
+<p>The function displays a state map plot including accidents location
+by year</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>state_num <span class="ot">&lt;-</span> <span class="dv">49</span> <span class="co"># Utah</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>yr <span class="ot">&lt;-</span> <span class="dv">2014</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fars_map_state</span>(state_num, yr)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAD00lEQVR4nO3dgW7aQBAG4cv7v3TVogIlxuMY3+2/6oxUVaC14349k2BoGV+226g+gPQEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCJgO92/3YuPE6m/F3VwS0NzS27y4qAejNBgJN3Pa6qoF2Bv47oN0vNXyQxqFXI4FgViCYFQimBYJJgSZue10ZQBtjQyCaE2jittcVAuQKOjEn0MRtrysEyBWEg/6gCIMC7Y4NgQ7Mvbl4X1sK0OaTjYRCgO5r6ElKoH8nv40KRNse7LKD3T6K1rtfUA7Q7KVwshyg0GKAUikzgDZeV01pNtB9//vP12/fjkbMlehHs4/n2GvP48+vrecb5dUD3VhG6lmWAvQ19s/GslKAxvefgzKcyoHuZ9h4uv3xXq+rHOjv2MYZFrGEyoHGy+8Hd7cMrxzoPnj+ZfyphQCNh9AnrxRNKAToxPCiooAShbKADuxu9WWjMCC4ZF9wUS0M6P3WVc9ks4ECCgPK88wCyrteFgcUVxbQuS2mlgQURnMrCGi8vVFZEFBmAkECQQJBAkHZQAG82UABCQQJBKUDjQv28fEBdN7/9HoAFTL3ACosDSgONA0oLoGgMKA8zwigPJZHEUDJCQQJBE3+AxzYfThhPVB4nYBK/sldJyB8f9WMwoDyTskYoDyaWzFAqQkEtQRayd4SaGUCQQJBlUAt9FxBkECQQJBAUCFQDzxXEBQJlPSfUUUCJSUQJBAkEBQJlMQaCZRUa6AV/K2BViQQJBAUCJSFGgiU1RqgsXnv/jYh+Q4zKA4oTTQOKC2BoOVA3cRcQZBAUClQBz1XELQYqJ+XQNAaoIlfpftjRL8l85JAkI9B0BKg8XyjWQsfpJPes3G8VadYT52vhUA/mg7K72LQfKDt6/a/7/npJ1+WYE8HOvfxn0c/QrT9x4j2TyBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEggSCBIIEgg6BeqOUJBDiDB9gAAAABJRU5ErkJggg==" /><!-- --></p>
+</div>
+</div>
+<div id="links" class="section level1">
+<h1>Links:</h1>
+<ul>
+<li><a href="https://github.com/ByronMattingly2015/FARS">Package fars
+GitHub</a></li>
+<li><s><a href="https://travis-ci.org/ByronMattingly2015/FARS">Package
+fars Travis CI</a></s> (Cost: $64/month)</li>
+<li><a href="https://ci.appveyor.com/project/ByronMattingly2015/FARS">Package
+Appveyor</a></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

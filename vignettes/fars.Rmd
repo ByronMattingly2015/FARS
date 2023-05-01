@@ -1,0 +1,103 @@
+---
+title: "Fatality Analysis Reporting System (FARS)"
+author: "Byron Mattingly"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Vignette Info
+
+The fars package reads and plots Fatality Analysis Reporting System (FARS) data
+from the [National Highway Traffic Safety Administration](https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars).
+
+According to [Wikipedia](https://en.wikipedia.org/wiki/Fatality_Analysis_Reporting_System), "Fatality Analysis Reporting System [FARS](https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars) was created in the United States by the National Highway Traffic Safety Administration (NHTSA) to provide an overall measure of highway safety, to help suggest solutions, and to help provide an objective basis to evaluate the effectiveness of motor vehicle safety standards and highway safety programs.
+
+## Load Packages
+```{r setup, include = FALSE}
+library(fars)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+## Dependencies
+
+You need to load the following packages before starting:
+
+```{r, echo=TRUE, include=TRUE}
+library(dplyr)
+library(maps)
+library(readr)
+library(tidyr)
+```
+
+
+## Package Description
+
+This is the final Peer-graded Assignment from Coursera's Building an R Package. 
+
+The `FARS` package contains functions provided for the students. These functions were written to analyze data from the [US National Highway Traffic Safety Administration's Fatality Analysis Reporting System](https://www.nhtsa.gov) (FARS). FARS is a nationwide census providing the American public yearly data regarding fatal injuries suffered in motor vehicle traffic crashes.
+
+## Included data
+
+Data files included within the package are:
+
+```{r}
+list.files(system.file("extdata", package = "fars"))
+```
+
+
+## Package Functions
+
+### Function `make_filename`
+
+This function returns file name and path to the data files:
+
+```{r}
+yr <- 2015
+make_filename(yr)
+```
+
+### Function `fars_read_years`
+
+Ancillary function used by `fars_summarize_years`
+
+```{r}
+fars_read_years(2013)
+```
+
+
+### Function `fars_summarize_years`
+
+This function summarizes yearly accidents data, by month.
+
+```{r}
+plot(fars_summarize_years(2015))
+fars_summarize_years(c(2015, 2014))
+```
+
+#
+plot(fars_summarize_years(2015))
+
+
+### Function `fars_map_state`
+
+The function displays a state map plot including accidents location
+by year
+
+```{r}
+state_num <- 49 # Utah
+yr <- 2014
+fars_map_state(state_num, yr)
+```
+
+
+# Links:
+* [Package fars GitHub](https://github.com/ByronMattingly2015/FARS)
+* <s>[Package fars Travis CI](https://travis-ci.org/ByronMattingly2015/FARS)</s> (Cost: $64/month)
+* [Package Appveyor](https://ci.appveyor.com/project/ByronMattingly2015/FARS)
