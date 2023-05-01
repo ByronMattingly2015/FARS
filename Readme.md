@@ -32,13 +32,15 @@ your package. This assessment will ask reviewers the following questions:
 [man/](https://github.com/ByronMattingly2015/FARS/tree/master/man) with a corresponding directory of documentation files?
 * Does this package contain a 
 [vignette/](https://github.com/ByronMattingly2015/FARS/blob/master/vignettes/fars.Rmd) 
+[vignette/](https://github.com/ByronMattingly2015/FARS/blob/master/vignettes) 
 which provides a meaningful description of the package and how it should be 
 used?
 * Does this package have at least one test included in the [tests/](https://github.com/ByronMattingly2015/FARS/tree/master/tests/testthat) directory?
 * Does this package have a [NAMESPACE](https://github.com/ByronMattingly2015/FARS/blob/master/NAMESPACE) file?
+* Does this package have a [NAMESPACE](https://github.com/ByronMattingly2015/FARS/NAMESPACE) file?
 * Does the README.md file for this directory have a <s>Travis badge</s>[AppVeyor badge](https://ci.appveyor.com/project/ByronMattingly2015/FARS)?
 * Is the build of this package passing on <s>Travis badge</s>[AppVeyor badge](https://ci.appveyor.com/project/ByronMattingly2015/FARS)?
-* Are the build logs for this package on <s>Travis badge</s>[AppVeyor badge](https://(https://ci.appveyor.com/project/ByronMattingly2015/FARS) free of any errors, warnings, or notes?
+* Are the build logs for this package on <s>Travis badge</s>[AppVeyor badge](https://ci.appveyor.com/project/ByronMattingly2015/FARS) free of any errors, warnings, or notes?
 
 ## Links:
 * [8.3 Raw Data file](https://r-pkgs.org/data.html#sec-data-extdata) explains how to use inst/extdata.
